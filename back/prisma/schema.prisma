@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  website     String?
+  logo        String?
+  country     String
+  createdAt   DateTime  @default(now())
+  products    Product[]
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  price       Float
+  brandId     String
+  categoryId  String
+  releaseDate DateTime?
+  createdAt   DateTime  @default(now())
+
+  brand    Brand    @relation(fields: [brandId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+  type     Type     @relation(fields: [typeId], references: [id])
+  typeId   String
+
+  ingredients ProductsIngredients[]
+  favoris     Favoris[]
+  avis        Avis[]
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  products Product[]
+}
+
+model Type {
+  id       String    @id @default(uuid())
+  name     String
+  products Product[]
+}
+
+model Ingredient {
+  id          String                @id @default(uuid())
+  name        String
+  description String?
+  origine     String?
+  products    ProductsIngredients[]
+}
+
+model ProductsIngredients {
+  productId    String
+  ingredientId String
+  product      Product    @relation(fields: [productId], references: [id])
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@id([productId, ingredientId])
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      String
+  createdAt DateTime  @default(now())
+  favoris   Favoris[]
+  avis      Avis[]
+}
+
+model Favoris {
+  id        String  @id @default(uuid())
+  userId    String
+  productId String
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Avis {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  rating    Float
+  comment   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
